@@ -325,8 +325,48 @@ function getBalanceIndex(arr) {
  *          [10, 9,  8,  7]
  *        ]
  */
-function getSpiralMatrix(/* size */) {
-  throw new Error('Not implemented');
+function getSpiralMatrix(size) {
+  const matrix = [];
+  for (let i = 0; i < size; i += 1) {
+    matrix[i] = [];
+  }
+  let num = 0;
+  let top = 0;
+  let bottom = size - 1;
+  let left = 0;
+  let right = size - 1;
+
+  while (top <= bottom && left <= right) {
+    for (let i = left; i <= right; i += 1) {
+      matrix[top][i] = num + 1;
+      num += 1;
+    }
+    top += 1;
+
+    for (let i = top; i <= bottom; i += 1) {
+      matrix[i][right] = num + 1;
+      num += 1;
+    }
+    right -= 1;
+
+    if (top <= bottom) {
+      for (let i = right; i >= left; i -= 1) {
+        matrix[bottom][i] = num + 1;
+        num += 1;
+      }
+      bottom -= 1;
+    }
+
+    if (left <= right) {
+      for (let i = bottom; i >= top; i -= 1) {
+        matrix[i][left] = num + 1;
+        num += 1;
+      }
+      left += 1;
+    }
+  }
+
+  return matrix;
 }
 
 /**
@@ -344,10 +384,25 @@ function getSpiralMatrix(/* size */) {
  *    [7, 8, 9]         [9, 6, 3]
  *  ]                 ]
  */
-function rotateMatrix(/* matrix */) {
-  throw new Error('Not implemented');
+function rotateMatrix(matrix) {
+  const long = matrix.length;
+  const newMatrix = matrix;
+  for (let i = 0; i < long; i += 1) {
+    for (let j = i + 1; j < long; j += 1) {
+      const saveNum = matrix[i][j];
+      newMatrix[i][j] = matrix[j][i];
+      newMatrix[j][i] = saveNum;
+    }
+  }
+  for (let i = 0; i < long; i += 1) {
+    for (let j = 0; j < Math.floor(long / 2); j += 1) {
+      const saveNum = matrix[i][j];
+      newMatrix[i][j] = matrix[i][long - j - 1];
+      newMatrix[i][long - j - 1] = saveNum;
+    }
+  }
+  return newMatrix;
 }
-
 /**
  * Sorts an array of numbers in ascending order in place.
  * Employ any sorting algorithm of your choice.
@@ -362,11 +417,21 @@ function rotateMatrix(/* matrix */) {
  *  [2, 9, 5, 9]    => [2, 5, 9, 9]
  *  [-2, 9, 5, -3]  => [-3, -2, 5, 9]
  */
-function sortByAsc(/* arr */) {
-  throw new Error('Not implemented');
+function sortByAsc(arr) {
+  const newArr = [...arr];
+  for (let i = 0; i < arr.length; i += 1) {
+    for (let j = 0; j < arr.length - i - 1; j += 1) {
+      if (arr[j] > arr[j + 1]) {
+        const temp = arr[j];
+        newArr[j] = arr[j + 1];
+        newArr[j + 1] = temp;
+      }
+    }
+  }
+  return newArr;
 }
 
-/**
+/*
  * Shuffles characters in a string so that the characters with an odd index are moved to the end of the string at each iteration.
  * Take into account that the string can be very long and the number of iterations is large. Consider how you can optimize your solution.
  * Usage of Array class methods is not allowed in this task.
@@ -383,8 +448,36 @@ function sortByAsc(/* arr */) {
  *  '012345', 3 => '024135' => '043215' => '031425'
  *  'qwerty', 3 => 'qetwry' => 'qtrewy' => 'qrwtey'
  */
-function shuffleChar(/* str, iterations */) {
-  throw new Error('Not implemented');
+function shuffleChar(str, iterations) {
+  function shuffleOnce(s) {
+    let odd = '';
+    let even = '';
+    for (let k = 0; k < s.length; k += 1) {
+      if (k % 2 === 0) {
+        even += s[k];
+      } else {
+        odd += s[k];
+      }
+    }
+    return even + odd;
+  }
+  const seen = {};
+  let final = str;
+  for (let i = 0; i < iterations; i += 1) {
+    if (seen[final]) {
+      const cycleStart = seen[final];
+      const cycleLength = i - cycleStart;
+      const remainingIterations = (iterations - i) % cycleLength;
+      for (let j = 0; j < remainingIterations; j += 1) {
+        final = shuffleOnce(final);
+      }
+      return final;
+    }
+    seen[final] = i;
+    final = shuffleOnce(final);
+  }
+
+  return final;
 }
 
 /**
@@ -404,10 +497,61 @@ function shuffleChar(/* str, iterations */) {
  * @param {number} number The source number
  * @returns {number} The nearest larger number, or original number if none exists.
  */
-function getNearestBigger(/* number */) {
-  throw new Error('Not implemented');
-}
+function getNearestBigger(num) {
+  const digits = [];
+  let n = num;
 
+  while (n > 0) {
+    digits.unshift(n % 10);
+    n = Math.floor(n / 10);
+  }
+
+  let i = digits.length - 2;
+  while (i >= 0 && digits[i] >= digits[i + 1]) {
+    i -= 1;
+  }
+
+  if (i < 0) {
+    return num;
+  }
+
+  let j = digits.length - 1;
+  while (digits[j] <= digits[i]) {
+    j -= 1;
+  }
+
+  const temp = digits[i];
+  digits[i] = digits[j];
+  digits[j] = temp;
+
+  const sortedTail = [];
+  for (let k = i + 1; k < digits.length; k += 1) {
+    sortedTail.push(digits[k]);
+  }
+  for (let a = 0; a < sortedTail.length; a += 1) {
+    for (let b = 0; b < sortedTail.length - a - 1; b += 1) {
+      if (sortedTail[b] > sortedTail[b + 1]) {
+        const t = sortedTail[b];
+        sortedTail[b] = sortedTail[b + 1];
+        sortedTail[b + 1] = t;
+      }
+    }
+  }
+  const resultDigits = [];
+  for (let k = 0; k <= i; k += 1) {
+    resultDigits.push(digits[k]);
+  }
+  for (let k = 0; k < sortedTail.length; k += 1) {
+    resultDigits.push(sortedTail[k]);
+  }
+
+  let result = 0;
+  for (let k = 0; k < resultDigits.length; k += 1) {
+    result = result * 10 + resultDigits[k];
+  }
+
+  return result;
+}
 module.exports = {
   isPositive,
   getMaxNumber,
